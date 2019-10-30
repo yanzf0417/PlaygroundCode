@@ -1,0 +1,5 @@
+node_modules/
+.vs/
+package-lock.json
+vsc-extension-quickstart.md
+src/test/
