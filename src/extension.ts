@@ -3,17 +3,19 @@
 import * as vscode from 'vscode'; 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as utils from './utils' 
+import * as os from 'os';
+import * as utils from './utils';
+import * as pg from './playground';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 
 let sessionId;
 let tmpDir : string;
+let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "playgroundcode" is now active!');
+	let tmpdir = os.tmpdir();
+	playground = new pg.Playground(tmpdir);
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -23,28 +25,14 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed 
 		// Display a message box to the user 
 		let language = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.languageId : "plaintext";
-		sessionId = Date.parse(new Date().toString());
-		tmpDir = `${vscode.env.appRoot}${path.sep}temp${path.sep}vscode_playground${path.sep}${sessionId}`;
-		let tmpPath = `${tmpDir}${path.sep}vscode_playground_${language}.playground`;
-		if(!fs.existsSync(tmpDir)){ 
-			utils.mkdirSync(tmpDir);
-		}
-		if(!fs.existsSync(tmpPath)){
-			let content = 
-`
-print('hello world')
-`;
-			fs.writeFileSync(tmpPath,content);
-		}
-		//let content = fs.readFileSync(tmpPath).toString();
-		//let newDoc = await vscode.workspace.openTextDocument({language:language,content:content.toString()}); 
-		//let editor = await vscode.window.showTextDocument(newDoc);
-		let newDoc = await vscode.window.showTextDocument(vscode.Uri.file(tmpPath));
-		let editor = await vscode.languages.setTextDocumentLanguage(newDoc.document,language);
+		sessionId = Date.parse(new Date().toString()).toString(); 
+		playground.setPlaygroundDir(sessionId); 
+		await playground.createPlayground(language);
 		//vscode.window.showQuickPick(["php","go","python","js"],{canPickMany:false}); 
 	});
 //runplayground
 	let disposable2 = vscode.commands.registerTextEditorCommand('extension.runplayground',(editor,edit) => {
+		console.log(editor.document.fileName);
 		editor.document.save();
 		let languageId = editor.document.languageId;
 		let conf = vscode.workspace.getConfiguration("playground");

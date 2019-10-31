@@ -18,8 +18,38 @@
 			{
 				"command": "extension.playgroundcode",
 				"title": "playgroundcode"
+			},
+			{
+				"command": "extension.runplayground",
+				"title": "Run Playground",
+				"icon":{
+					"dark": "./assets/icon/dark/run.png",
+					"light": "$(play)"
+				}
 			}
-		]
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"when": "resourceExtname == .playground",
+					"command": "extension.runplayground",
+					"group": "navigation"
+				}
+			]
+		},
+		"configuration":{
+			"title": "Playground",
+			"properties": {
+				"playground.launch.go":{
+					"type":"string",
+					"default":"go"
+				},
+				"playground.launch.php":{
+					"type":"string",
+					"default":"php"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
