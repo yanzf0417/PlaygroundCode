@@ -4,7 +4,7 @@
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
-		"vscode": "^1.39.0"
+		"vscode": "^1.27.0"
 	},
 	"categories": [
 		"Other"
@@ -17,7 +17,7 @@
 		"commands": [
 			{
 				"command": "extension.playgroundcode",
-				"title": "Hello World"
+				"title": "playgroundcode"
 			}
 		]
 	},
