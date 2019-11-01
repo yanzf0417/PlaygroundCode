@@ -2,6 +2,7 @@
 	"name": "playgroundcode",
 	"displayName": "PlaygroundCode",
 	"description": "",
+	"publisher": "yanzf",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.27.0"
@@ -22,7 +23,7 @@
 			{
 				"command": "extension.runplayground",
 				"title": "Run Playground",
-				"icon":{
+				"icon": {
 					"dark": "./assets/icon/dark/run.png",
 					"light": "$(play)"
 				}
@@ -37,16 +38,16 @@
 				}
 			]
 		},
-		"configuration":{
+		"configuration": {
 			"title": "Playground",
 			"properties": {
-				"playground.launch.go":{
-					"type":"string",
-					"default":"go"
+				"playground.launch.go": {
+					"type": "string",
+					"default": "go"
 				},
-				"playground.launch.php":{
-					"type":"string",
-					"default":"php"
+				"playground.launch.php": {
+					"type": "string",
+					"default": "php"
 				}
 			}
 		}
@@ -68,5 +69,8 @@
 		"typescript": "^3.3.1",
 		"tslint": "^5.12.1",
 		"vscode-test": "^1.2.0"
+	},
+	"dependencies": {
+		"reflect-metadata": "^0.1.13"
 	}
 }

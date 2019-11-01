@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as utils from './utils';
+import 'reflect-metadata';
 
 export class Playground {
     TmpDir: string;
@@ -10,10 +12,10 @@ export class Playground {
         this.TmpDir = tmpdir;
     }
 
-    setPlaygroundDir(dirname: string): void {
+    setPlaygroundDir(dirname: string): void { 
         this.PlaygroundDir = `${this.TmpDir}${path.sep}vscode_playground${path.sep}${dirname}`;
         if (!fs.existsSync(this.PlaygroundDir)) {
-            fs.mkdirSync(this.PlaygroundDir);
+            utils.mkdirSync(this.PlaygroundDir);
         }
     }
 
@@ -38,7 +40,9 @@ export class Playground {
             }
             doc = await vscode.languages.setTextDocumentLanguage(doc, language);
         }
-        doc.save();
+        await doc.save();
+        let runFunction = Reflect.get(this,'run_common');
+        Reflect.apply(<Function>runFunction,this,[doc.languageId,doc.fileName]);
     }
 
     getPlaygroundTerminal(): vscode.Terminal {
@@ -53,7 +57,9 @@ export class Playground {
 
     run_common(languageId:string,filename:string) {
         let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME);
-		let cmd = `${conf.launch[languageId]} "${filename}"`;
+        let cmd = `${conf.launch[languageId]} "${filename}"`;
+        let terminal = this.getPlaygroundTerminal();
+        terminal.sendText(cmd,true);
     }
 }
 
