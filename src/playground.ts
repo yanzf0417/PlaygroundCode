@@ -57,13 +57,14 @@ export class Playground {
 
     run_common(languageId:string,filename:string) {
         let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME);
+        console.log(conf);
         let cmd = `${conf.launch[languageId]} "${filename}"`;
         let terminal = this.getPlaygroundTerminal();
         terminal.sendText(cmd,true);
     }
 }
 
-const PLAYGROUND_NAME = "Playground"; 
+const PLAYGROUND_NAME = "playground"; 
 
 const SUPPORT_LANGUAGES = ["python", "go", "php", "js", "lua"];
 
