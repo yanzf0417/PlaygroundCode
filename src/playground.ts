@@ -119,7 +119,14 @@ class PlaygroundFileSystemProvider implements FileSystemProvider {
     
     constructor(baseDir: string){
         this.onDidChangeFile = function(listener: (e: vscode.FileChangeEvent[]) => any, thisArgs?: any, disposables?: vscode.Disposable[] | undefined): vscode.Disposable{
-            return new vscode.Disposable(function(){});
+            return new vscode.Disposable(function(){
+                if(disposables){
+                    for (let index = 0; index < disposables.length; index++) {
+                        const element = disposables[index];
+                        element.dispose();
+                    }
+                }
+            });
         }
     }
 
