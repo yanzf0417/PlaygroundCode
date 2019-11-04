@@ -5,6 +5,7 @@ import * as utils from './utils';
 import 'reflect-metadata';
 import { FileSystemProvider } from 'vscode';
 import { Event } from 'vscode';
+import { prototype } from 'events';
 
 const PLAYGROUND_NAME = "playground"; 
 const SUPPORT_LANGUAGES = ["python", "go", "php", "js", "lua"];
@@ -115,19 +116,11 @@ export class Playground {
 }
 
 class PlaygroundFileSystemProvider implements FileSystemProvider {
-    onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]>;   
+    private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+    readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
     
-    constructor(baseDir: string){
-        this.onDidChangeFile = function(listener: (e: vscode.FileChangeEvent[]) => any, thisArgs?: any, disposables?: vscode.Disposable[] | undefined): vscode.Disposable{
-            return new vscode.Disposable(function(){
-                if(disposables){
-                    for (let index = 0; index < disposables.length; index++) {
-                        const element = disposables[index];
-                        element.dispose();
-                    }
-                }
-            });
-        }
+    constructor(baseDir: string){ 
+        type Entry = File | Directory;
     }
 
     watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
