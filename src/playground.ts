@@ -4,8 +4,7 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import 'reflect-metadata';
 import { FileSystemProvider } from 'vscode';
-import { Event } from 'vscode';
-import { prototype } from 'events';
+import { FileStat } from 'vscode';  
 
 const PLAYGROUND_NAME = "playground"; 
 const SUPPORT_LANGUAGES = ["python", "go", "php", "js", "lua"];
@@ -33,17 +32,21 @@ const PLAYGROUND_TPL_LUA =
 
 export class Playground {
     TmpDir: string;
+    FileSystemProvider: PlaygroundFileSystemProvider | undefined;
     PlaygroundDir: string = '';
 
-    constructor(tmpdir: string) {
+    constructor(tmpdir: string) { 
         this.TmpDir = tmpdir;
+        this.FileSystemProvider = undefined;
     }
 
-    setPlaygroundDir(dirname: string): void { 
+    setPlaygroundDir(dirname: string): PlaygroundFileSystemProvider { 
         this.PlaygroundDir = `${this.TmpDir}${path.sep}vscode_playground${path.sep}${dirname}`;
         if (!fs.existsSync(this.PlaygroundDir)) {
             utils.mkdirSync(this.PlaygroundDir);
         }
+        this.FileSystemProvider = new PlaygroundFileSystemProvider(this.PlaygroundDir);
+        return this.FileSystemProvider;
     }
 
     async createPlayground(language: string): Promise<vscode.TextDocument | null> {
@@ -54,12 +57,14 @@ export class Playground {
             }
             language = pick;
         }
-        let playgroundPath = `${this.PlaygroundDir}${path.sep}vscode_playground_${language}.playground`;
+        let playgroundPath = `${this.PlaygroundDir}${path.sep}vscode_playground.${language}`;
+        let playgroundSchemePath = `playground://root/vscode_playground.${language}`;
         if (!fs.existsSync(playgroundPath)) {
             let content = eval('PLAYGROUND_TPL_' + language.toUpperCase());
             fs.writeFileSync(playgroundPath, content);
         }
-        let editor = await vscode.window.showTextDocument(vscode.Uri.file(playgroundPath));
+
+        let editor = await vscode.window.showTextDocument(vscode.Uri.parse(playgroundSchemePath));
         let doc = await vscode.languages.setTextDocumentLanguage(editor.document, language); 
         return doc;
     }
@@ -74,10 +79,11 @@ export class Playground {
         }
         await doc.save();
         let runFunction = Reflect.get(this,`run_${doc.languageId}`);
+        let realFilePath = (<PlaygroundFileSystemProvider>this.FileSystemProvider).toRealFilePath(doc.uri)
         if(runFunction != undefined) {
-            Reflect.apply(<Function>runFunction,this,[doc.languageId,doc.fileName]); 
+            Reflect.apply(<Function>runFunction,this,[realFilePath]); 
         }else{
-            this.run_common(doc.languageId,doc.fileName);
+            this.run_common(doc.languageId,realFilePath);
         }
     }
 
@@ -111,42 +117,119 @@ export class Playground {
     }
 
     run_go(fileName: string){
+        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME); 
+        let cmd = `${conf.launch["go"]} run "${fileName}"`;
+        let terminal = this.getPlaygroundTerminal();
+        terminal.show(true);
+        terminal.sendText(cmd,true);
+    }
+}
+ 
+export class File implements vscode.FileStat {
+    type: vscode.FileType;
+    ctime: number;
+    mtime: number;
+    size: number;
 
+    name: string; 
+
+    constructor(name: string) {
+        this.type = vscode.FileType.File;
+        this.ctime = Date.now();
+        this.mtime = Date.now();
+        this.size = 0;
+        this.name = name;
     }
 }
 
-class PlaygroundFileSystemProvider implements FileSystemProvider {
+export class Directory implements vscode.FileStat {
+
+    type: vscode.FileType;
+    ctime: number;
+    mtime: number;
+    size: number;
+
+    name: string;
+    entries: Map<string, File | Directory>;
+
+    constructor(name: string) {
+        this.type = vscode.FileType.Directory;
+        this.ctime = Date.now();
+        this.mtime = Date.now();
+        this.size = 0;
+        this.name = name;
+        this.entries = new Map();
+    }
+}
+
+export type Entry = File | Directory;
+
+export class PlaygroundFileSystemProvider implements FileSystemProvider {
+    private _baseDir :string;
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
     
     constructor(baseDir: string){ 
-        type Entry = File | Directory;
+        this._baseDir = baseDir;
     }
 
     watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
-        throw new Error("Method not implemented.");
+        return new vscode.Disposable(() => {});
     }
     stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        if(!fs.existsSync(filepath)){
+            throw vscode.FileSystemError.FileNotFound(filepath);
+        }
+        let stat = fs.statSync(filepath);
+        if(stat.isFile()) { 
+            return new File(filepath);
+        }else{
+            return new Directory(filepath);
+        }
     }
     readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        let files = fs.readdirSync(filepath);  
+        let list :[string, vscode.FileType][] = [];
+        for (const file in files) {
+            if(fs.statSync(file).isFile()){
+                list.push([file,vscode.FileType.File]);
+            }else{
+                list.push([file,vscode.FileType.Directory]);
+            }
+        }
+        return list;
+        
     }
     createDirectory(uri: vscode.Uri): void | Thenable<void> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        utils.mkdirSync(filepath);
     }
     readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        return fs.readFileSync(filepath);
     }
     writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        fs.writeFileSync(filepath,content);
     }
     delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
-        throw new Error("Method not implemented.");
+        let filepath :string = this.toRealFilePath(uri);
+        if(fs.statSync(filepath).isFile()){
+            fs.unlinkSync(filepath);
+        }else{
+            fs.rmdirSync(filepath);
+        }
     }
     rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
         throw new Error("Method not implemented.");
     }
 
+    toRealFilePath(uri: vscode.Uri): string{
+        let filepath :string = this._baseDir + path.sep + uri.path; 
+        return filepath;
+    }
 
 }
+ 

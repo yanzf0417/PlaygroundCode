@@ -12,12 +12,13 @@ import * as pg from './playground';
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
 
-	let tmpdir = os.tmpdir();
+	console.log("test");
+	let tmpdir = os.tmpdir(); 
 	playground = new pg.Playground(tmpdir);
 	let sessionId = Date.parse(new Date().toString()).toString(); 
 	playground.setPlaygroundDir(sessionId); 
 
-	vscode.workspace.registerFileSystemProvider("playground",vscode.file)
+	vscode.workspace.registerFileSystemProvider("playground",<pg.PlaygroundFileSystemProvider>playground.FileSystemProvider);
 
 	let disposable = vscode.commands.registerCommand('extension.playgroundcode', async () => { 
 		let language = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.languageId : ""; 
