@@ -40,6 +40,8 @@ export class Playground {
         this.FileSystemProvider = undefined;
     }
 
+    
+
     setPlaygroundDir(dirname: string): PlaygroundFileSystemProvider { 
         this.PlaygroundDir = `${this.TmpDir}${path.sep}vscode_playground${path.sep}${dirname}`;
         if (!fs.existsSync(this.PlaygroundDir)) {
@@ -227,7 +229,7 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
     }
 
     toRealFilePath(uri: vscode.Uri): string{
-        let filepath :string = this._baseDir + path.sep + uri.path; 
+        let filepath :string = this._baseDir + path.sep + uri.path.substr(1); 
         return filepath;
     }
 

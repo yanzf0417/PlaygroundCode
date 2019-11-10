@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(disposable);
 	context.subscriptions.push(disposable2);
+	context.subscriptions.push(new vscode.Disposable(()=>{console.log('bye');}));
 }
 
 // this method is called when your extension is deactivated
