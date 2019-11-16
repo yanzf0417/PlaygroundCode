@@ -70,6 +70,10 @@ export class Playground {
         } 
     }
 
+    /**
+     * Run the playground code.
+     * @param document 
+     */
     async runPlayground(document: vscode.TextDocument) { 
         await document.save();
         this.stop(); 
