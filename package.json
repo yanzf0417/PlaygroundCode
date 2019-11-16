@@ -1,5 +1,5 @@
 {
-	"name": "playgroundcode",
+	"name": "com.yanzf.playgroundcode",
 	"displayName": "PlaygroundCode",
 	"description": "",
 	"publisher": "yanzf",
@@ -8,7 +8,7 @@
 		"vscode": "^1.34.0"
 	},
 	"categories": [
-		"Other"
+		"Other","Programming Languages"
 	],
 	"activationEvents": [
 		"onCommand:extension.playgroundcode"
@@ -18,23 +18,61 @@
 		"commands": [
 			{
 				"command": "extension.playgroundcode",
-				"title": "playgroundcode"
+				"title": "Playground",
+				"category": "Playground",
+				"icon":{
+					"dark": "assets/icon/dark/playground.svg",
+					"light": "assets/icon/light/playground.svg"
+				}
 			},
 			{
-				"command": "extension.runplayground",
-				"title": "Run Playground",
-				"icon": {
-					"dark": "./assets/icon/dark/run.png",
-					"light": "$(play)"
+				"command": "extension.playgroundrun",
+				"title": "Run playground code",
+				"category": "Playground",
+				"icon":{
+					"dark": "assets/icon/dark/run.svg",
+					"light": "assets/icon/light/run.svg"
+				}
+			},
+			{
+				"command": "extension.playgroundstop",
+				"title": "Stop playground process",
+				"category": "Playground",
+				"icon":{
+					"dark": "assets/icon/dark/stop.svg",
+					"light": "assets/icon/light/stop.svg"
+				}
+			},
+			{
+				"command": "extension.playgroundreset",
+				"title": "Reset playground code",
+				"category": "Playground",
+				"icon":{
+					"dark": "assets/icon/dark/reset.svg",
+					"light": "assets/icon/light/reset.svg"
 				}
 			}
 		],
 		"menus": {
 			"editor/title": [
+				{ 
+					"command": "extension.playgroundcode",
+					"group": "navigation@1"
+				},
 				{
 					"when": "resourceScheme == playground",
-					"command": "extension.runplayground",
-					"group": "navigation"
+					"command": "extension.playgroundrun",
+					"group": "navigation@2"
+				},
+				{
+					"when": "resourceScheme == playground",
+					"command": "extension.playgroundstop",
+					"group": "navigation@3"
+				},
+				{
+					"when": "resourceScheme == playground",
+					"command": "extension.playgroundreset",
+					"group": "navigation@4"
 				}
 			]
 		},
@@ -43,15 +81,39 @@
 			"properties": {
 				"playground.launch.go": {
 					"type": "string",
-					"default": "go"
+					"default": "go run ${file}"
 				},
 				"playground.launch.php": {
 					"type": "string",
-					"default": "php"
+					"default": "php ${file}"
+				},
+				"playground.launch.csharp": {
+					"type": "string",
+					"default": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe /nologo /out:${file}.exe ${file} & ${file}.exe"
+				},
+				"playground.launch.python": {
+					"type": "string", 
+					"default":"python ${file}"
+				},
+				"playground.launch.javascript": {
+					"type": "string", 
+					"default":"node ${file}"
+				},
+				"playground.launch.lua": {
+					"type": "string", 
+					"default":"lua ${file}"
+				},
+				"playground.launch.rust": {
+					"type": "string", 
+					"default":"rustc --crate-name playground_rust ${file} & playground_rust.exe"
+				},
+				"playground.launch.java": {
+					"type": "string", 
+					"default":"javac ${file} & java vscode_playground"
 				}
 			}
 		}
-	},
+	}, 
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
@@ -71,6 +133,8 @@
 		"vscode-test": "^1.2.0"
 	},
 	"dependencies": {
-		"reflect-metadata": "^0.1.13"
-	}
+		"reflect-metadata": "^0.1.13",
+		"tree-kill": "^1.2.1"
+	},
+	"files": ["helloworlds/"]
 }

@@ -1,133 +1,147 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as utils from './utils';
-import 'reflect-metadata';
+import * as child_process  from 'child_process';
 import { FileSystemProvider } from 'vscode';
-import { FileStat } from 'vscode';  
+import { Buffer } from 'buffer';
+import { isString } from 'util';
 
-const PLAYGROUND_NAME = "playground"; 
-const SUPPORT_LANGUAGES = ["python", "go", "php", "js", "lua"];
-const PLAYGROUND_TPL_PLAINTEXT = "";
-const PLAYGROUND_TPL_GO =
-    `package main
 
-import(
-	"fmt"
-)
 
-func main(){
-	fmt.Println("Hello World")
-}` ;
-const PLAYGROUND_TPL_PYTHON =
-    `print('Hello World')`;
-const PLAYGROUND_TPL_PHP =
-    `<?php 
-echo "Hello world";
-?>`;
-const PLAYGROUND_TPL_JS =
-    `console.log("Hello World");`;
-const PLAYGROUND_TPL_LUA =
-    `print("Hello World")`;
+const PLAYGROUND_NAME = "playground";  
+export class Playground { 
+    public m_FileSystemProvider?: PlaygroundFileSystemProvider;
+    private m_PlaygroundDir: string ; 
+    private m_OutputChannel : vscode.OutputChannel;
+    private m_Process?: child_process.ChildProcess;
+    private m_ResetFlag: Array<string>;
+    private m_LanguageQuickPickItems?: Array<LanguagePickItem>;
+    private m_extensionPath: string;
 
-export class Playground {
-    TmpDir: string;
-    FileSystemProvider: PlaygroundFileSystemProvider | undefined;
-    PlaygroundDir: string = '';
 
-    constructor(tmpdir: string) { 
-        this.TmpDir = tmpdir;
-        this.FileSystemProvider = undefined;
+    constructor(extensionPath: string) {   
+        this.m_extensionPath = extensionPath;
+        this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
+        this.m_ResetFlag = new Array<string>();
+        this.m_PlaygroundDir = ''; 
+        this.initLanguageQuickPickItems(); 
+    } 
+
+    initLanguageQuickPickItems(){
+        let tmp = new Array<LanguagePickItem>();
+        for (const language in vscode.workspace.getConfiguration("playground.launch")) {
+            if(!isString(vscode.workspace.getConfiguration("playground.launch").get(language))){
+                continue;
+            }
+            let ext:string;
+            if(language == "csharp") ext = "cs";
+            else if(language == "python") ext="py";
+            else if(language == "javascript") ext="js";
+            else if(language == "rust") ext="rs";
+            else ext = language; 
+            tmp.push(new LanguagePickItem(language,ext));
+        } 
+        this.m_LanguageQuickPickItems = tmp;
     }
-
-    
 
     setPlaygroundDir(dirname: string): PlaygroundFileSystemProvider { 
-        this.PlaygroundDir = `${this.TmpDir}${path.sep}vscode_playground${path.sep}${dirname}`;
-        if (!fs.existsSync(this.PlaygroundDir)) {
-            utils.mkdirSync(this.PlaygroundDir);
+        this.m_PlaygroundDir = dirname;
+        if (!fs.existsSync(this.m_PlaygroundDir)) {
+            utils.mkdirSync(this.m_PlaygroundDir);
         }
-        this.FileSystemProvider = new PlaygroundFileSystemProvider(this.PlaygroundDir);
-        return this.FileSystemProvider;
+        this.m_FileSystemProvider = new PlaygroundFileSystemProvider(this.m_PlaygroundDir);
+        return this.m_FileSystemProvider;
     }
 
-    async createPlayground(language: string): Promise<vscode.TextDocument | null> {
-        if(language == "" || language == "plaintext" || SUPPORT_LANGUAGES.indexOf(language) == -1){
-            let pick = await vscode.window.showQuickPick(SUPPORT_LANGUAGES, { canPickMany: false });
-            if(pick == undefined){
-                return null;
-            }
-            language = pick;
-        }
-        let playgroundPath = `${this.PlaygroundDir}${path.sep}vscode_playground.${language}`;
-        let playgroundSchemePath = `playground://root/vscode_playground.${language}`;
-        if (!fs.existsSync(playgroundPath)) {
-            let content = eval('PLAYGROUND_TPL_' + language.toUpperCase());
-            fs.writeFileSync(playgroundPath, content);
-        }
+    async createPlayground(): Promise<vscode.TextDocument | null> {
+        let language = await vscode.window.showQuickPick<LanguagePickItem>(<Array<LanguagePickItem>>this.m_LanguageQuickPickItems, { canPickMany: false });
+        if(language == undefined){
+            return null;
+        } 
 
-        let editor = await vscode.window.showTextDocument(vscode.Uri.parse(playgroundSchemePath));
-        let doc = await vscode.languages.setTextDocumentLanguage(editor.document, language); 
-        return doc;
+        let playgroundPath = (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).toRealFilePath(this.getPlaygroundUri(language.extension));
+        let resetFile:boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(language.extension) == -1;
+        if (resetFile) { 
+            return this.reset(language.extension); 
+        } else{
+            return this.show(language.extension);
+        } 
     }
 
-    async runPlayground(editor: vscode.TextEditor) {
-        let doc = editor.document;
-        if (doc.languageId == undefined && await this.setPlaygroundLanguageId(doc) == false) {
-            return;
-        }else if(SUPPORT_LANGUAGES.indexOf(doc.languageId) == -1){
-            vscode.window.showInformationMessage(`Unsupport ${doc.languageId}.`);
-            return;
-        }
-        await doc.save();
-        let runFunction = Reflect.get(this,`run_${doc.languageId}`);
-        let realFilePath = (<PlaygroundFileSystemProvider>this.FileSystemProvider).toRealFilePath(doc.uri)
-        if(runFunction != undefined) {
-            Reflect.apply(<Function>runFunction,this,[realFilePath]); 
-        }else{
-            this.run_common(doc.languageId,realFilePath);
+    async runPlayground(document: vscode.TextDocument) { 
+        await document.save();
+        this.stop(); 
+        this.m_OutputChannel.dispose();
+        this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
+        this.m_OutputChannel.appendLine("Running."); 
+        let language = document.languageId;
+        let filepath = document.uri.path.substring(1);
+        let execScript = this.getExecScript(language,filepath); 
+        this.m_Process = child_process.spawn(execScript,{"shell":true,"cwd":this.m_PlaygroundDir}); 
+        this.m_Process.stdout.on('data',(data) => {
+            this.m_OutputChannel.append(data.toString());
+        });     
+        this.m_Process.stderr.on('data',(data) => { 
+            this.m_OutputChannel.append(data.toString());
+        });
+        this.m_Process.on('close',(code) => {
+            this.m_Process = undefined;
+            this.m_OutputChannel.appendLine(`\nExit with code=${code}.`);
+        });
+        this.m_OutputChannel.show(false);
+    } 
+
+    getExecScript(language: string,filepath: string):string {
+        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME);
+        let script:string = conf.launch[language];
+        os.platform()
+        return script.replace(/\${file}/ig,filepath);
+    }
+
+    async stop(){
+        if(this.m_Process != undefined){ 
+            this.m_OutputChannel.appendLine("Process killed.");
+            const treekill = require('tree-kill'); 
+            treekill(this.m_Process.pid); 
         }
     }
 
-    async setPlaygroundLanguageId(doc: vscode.TextDocument): Promise<boolean> {
-        vscode.window.showInformationMessage("pick the code language.");
-        let pick = await vscode.window.showQuickPick(SUPPORT_LANGUAGES, { canPickMany: false });
-        if(pick == undefined){
-            return false;
-        }
-        await vscode.languages.setTextDocumentLanguage(doc,pick);
-        return true;
+    async reset(language:string): Promise<vscode.TextDocument> {  
+        if(this.m_ResetFlag.indexOf(language) == -1)
+            this.m_ResetFlag.push(language);
+        let content = fs.readFileSync(path.join(this.m_extensionPath,`helloworlds/helloworld.${language}`));
+        let uri = this.getPlaygroundUri(language);
+        (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(uri,content,{"create":false,"overwrite":true}); 
+        return await this.show(language);
+    } 
+
+    async show(language: string): Promise<vscode.TextDocument> { 
+        let editor = await vscode.window.showTextDocument(this.getPlaygroundUri(language)); 
+        return editor.document;
     }
 
+    getPlaygroundUri(language:string){
+        return vscode.Uri.parse(`playground://root/vscode_playground.${language}`);
+    } 
+}
 
-    getPlaygroundTerminal(): vscode.Terminal {
-        for (let index = 0; index < vscode.window.terminals.length; index++) {
-            const terminal = vscode.window.terminals[index];
-            if (terminal.name == PLAYGROUND_NAME) {
-                return terminal;
-            }
-        }
-        return vscode.window.createTerminal(PLAYGROUND_NAME);
-    }
+class LanguagePickItem implements vscode.QuickPickItem {
+    label: string;    
+    description?: string | undefined;
+    detail?: string | undefined;
+    picked?: boolean | undefined;
+    alwaysShow?: boolean | undefined;
+    extension: string;
 
-    run_common(languageId:string,fileName:string) {
-        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME); 
-        let cmd = `${conf.launch[languageId]} "${fileName}"`;
-        let terminal = this.getPlaygroundTerminal();
-        terminal.show(true);
-        terminal.sendText(cmd,true);
-    }
-
-    run_go(fileName: string){
-        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME); 
-        let cmd = `${conf.launch["go"]} run "${fileName}"`;
-        let terminal = this.getPlaygroundTerminal();
-        terminal.show(true);
-        terminal.sendText(cmd,true);
+    constructor(label: string,extension: string){
+        this.label = label;
+        this.extension = extension;
     }
 }
- 
-export class File implements vscode.FileStat {
+
+class File implements vscode.FileStat {
     type: vscode.FileType;
     ctime: number;
     mtime: number;
@@ -144,7 +158,7 @@ export class File implements vscode.FileStat {
     }
 }
 
-export class Directory implements vscode.FileStat {
+class Directory implements vscode.FileStat {
 
     type: vscode.FileType;
     ctime: number;
@@ -164,12 +178,15 @@ export class Directory implements vscode.FileStat {
     }
 }
 
-export type Entry = File | Directory;
-
+type Entry = File | Directory; 
 export class PlaygroundFileSystemProvider implements FileSystemProvider {
     private _baseDir :string;
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+    private _bufferedEvents: vscode.FileChangeEvent[] = [];
+    private _fireSoonHandle?: NodeJS.Timer;
+
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
+    
     
     constructor(baseDir: string){ 
         this._baseDir = baseDir;
@@ -190,6 +207,7 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
             return new Directory(filepath);
         }
     }
+
     readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         let filepath :string = this.toRealFilePath(uri);
         let files = fs.readdirSync(filepath);  
@@ -204,18 +222,23 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
         return list;
         
     }
+
     createDirectory(uri: vscode.Uri): void | Thenable<void> {
         let filepath :string = this.toRealFilePath(uri);
         utils.mkdirSync(filepath);
     }
+
     readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
         let filepath :string = this.toRealFilePath(uri);
         return fs.readFileSync(filepath);
     }
-    writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
+
+    writeFile(uri: vscode.Uri, content: Uint8Array | string, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
         let filepath :string = this.toRealFilePath(uri);
         fs.writeFileSync(filepath,content);
+        this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
     }
+
     delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
         let filepath :string = this.toRealFilePath(uri);
         if(fs.statSync(filepath).isFile()){
@@ -233,5 +256,17 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
         return filepath;
     }
 
+    private _fireSoon(...events: vscode.FileChangeEvent[]): void {
+        this._bufferedEvents.push(...events);
+
+        if (this._fireSoonHandle) {
+            clearTimeout(this._fireSoonHandle);
+        }
+
+        this._fireSoonHandle = setTimeout(() => {
+            this._emitter.fire(this._bufferedEvents);
+            this._bufferedEvents.length = 0;
+        }, 5);
+    }
 }
  

@@ -1,36 +1,43 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode'; 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as os from 'os';
-import * as utils from './utils';
 import * as pg from './playground';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
  
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
-
-	console.log("test");
 	let tmpdir = os.tmpdir(); 
-	playground = new pg.Playground(tmpdir);
-	let sessionId = Date.parse(new Date().toString()).toString(); 
-	playground.setPlaygroundDir(sessionId); 
+	playground = new pg.Playground(context.extensionPath); 
+	playground.setPlaygroundDir(tmpdir); 
 
-	vscode.workspace.registerFileSystemProvider("playground",<pg.PlaygroundFileSystemProvider>playground.FileSystemProvider);
-
-	let disposable = vscode.commands.registerCommand('extension.playgroundcode', async () => { 
-		let language = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.languageId : ""; 
-		await playground.createPlayground(language); 
+	vscode.workspace.registerFileSystemProvider("playground",<pg.PlaygroundFileSystemProvider>playground.m_FileSystemProvider);
+	let codeDocument : vscode.TextDocument | null; 
+	let disposableCommandNew = vscode.commands.registerCommand('extension.playgroundcode', async () => {  
+		codeDocument = await playground.createPlayground(); 
 	}); 
 
-	let disposable2 = vscode.commands.registerTextEditorCommand('extension.runplayground',(editor,edit) => {
-		playground.runPlayground(editor);
+	let disposableCommandRun = vscode.commands.registerTextEditorCommand('extension.playgroundrun',(editor) => {
+		if(editor.document.uri.scheme == "playground")
+		codeDocument = editor.document; 
+		playground.runPlayground(<vscode.TextDocument>codeDocument);
 	});
-	context.subscriptions.push(disposable);
-	context.subscriptions.push(disposable2);
-	context.subscriptions.push(new vscode.Disposable(()=>{console.log('bye');}));
+
+	let disposableCommandStop = vscode.commands.registerTextEditorCommand('extension.playgroundstop',() => {
+		playground.stop();
+	});
+
+	let disposableCommandReset = vscode.commands.registerTextEditorCommand('extension.playgroundreset',(editor) => {
+		if(editor.document.uri.scheme == "playground")
+		codeDocument = editor.document; 
+		playground.reset((<vscode.TextDocument>codeDocument).languageId);
+	});
+
+	context.subscriptions.push(disposableCommandNew);
+	context.subscriptions.push(disposableCommandRun);
+	context.subscriptions.push(disposableCommandStop);
+	context.subscriptions.push(disposableCommandReset);
 }
 
 // this method is called when your extension is deactivated
