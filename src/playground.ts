@@ -36,11 +36,11 @@ export class Playground {
                 continue;
             }
             let ext:string;
-            if(language == "csharp") ext = "cs";
-            else if(language == "python") ext="py";
-            else if(language == "javascript") ext="js";
-            else if(language == "rust") ext="rs";
-            else ext = language; 
+            if(language === "csharp") { ext = "cs"; }
+            else if(language === "python") { ext="py"; }
+            else if(language === "javascript") { ext="js"; }
+            else if(language === "rust") { ext="rs"; }
+            else { ext = language; }
             tmp.push(new LanguagePickItem(language,ext));
         } 
         this.m_LanguageQuickPickItems = tmp;
@@ -113,7 +113,8 @@ export class Playground {
     }
 
     async reset(language:string): Promise<vscode.TextDocument> {  
-        if(this.m_ResetFlag.indexOf(language) == -1)
+        // tslint:disable-next-line:curly
+        if(this.m_ResetFlag.indexOf(language) === -1)
             this.m_ResetFlag.push(language);
         let content = fs.readFileSync(path.join(this.m_extensionPath,`helloworlds/helloworld.${language}`));
         let uri = this.getPlaygroundUri(language);
