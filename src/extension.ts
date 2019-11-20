@@ -3,12 +3,13 @@
 import * as vscode from 'vscode'; 
 import * as os from 'os';
 import * as pg from './playground';
+import * as path from 'path';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
  
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
-	let tmpdir = os.tmpdir(); 
+	let tmpdir = `${os.tmpdir()}${path.sep}vscode_playground`; 
 	playground = new pg.Playground(context.extensionPath); 
 	playground.setPlaygroundDir(tmpdir); 
 
@@ -31,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposableCommandReset = vscode.commands.registerTextEditorCommand('extension.playgroundreset',(editor) => {
 		if(editor.document.uri.scheme == "playground")
 		codeDocument = editor.document; 
-		playground.reset((<vscode.TextDocument>codeDocument).languageId);
+		playground.reset((<vscode.TextDocument>codeDocument).uri);
 	});
 
 	context.subscriptions.push(disposableCommandNew);

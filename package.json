@@ -87,10 +87,6 @@
 					"type": "string",
 					"default": "php ${file}"
 				},
-				"playground.launch.csharp": {
-					"type": "string",
-					"default": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe /nologo /out:${file}.exe ${file} & ${file}.exe"
-				},
 				"playground.launch.python": {
 					"type": "string", 
 					"default":"python ${file}"
@@ -110,6 +106,34 @@
 				"playground.launch.java": {
 					"type": "string", 
 					"default":"javac ${file} & java vscode_playground"
+				},
+				"playground.launch.ruby": {
+					"type": "string", 
+					"default":"ruby ${file}"
+				},
+				"playground.launch.bat": {
+					"type": "string", 
+					"default":"${file}"
+				},
+				"playground.launch.powershell": {
+					"type": "string", 
+					"default":"powershell.exe .\\${file}"
+				},
+				"playground.launch.csharp": {
+					"type": "string",
+					"default": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe /nologo /out:${file}.exe ${file} & ${file}.exe"
+				},
+				"playground.launch.csharp(dotnetcore)": {
+					"type": "string",
+					"default": "dotnet run --project vscode_playground_dotnetcore.csproj --main ${file}"
+				},
+				"playground.launch.fsharp": {
+					"type": "string", 
+					"default":"\"C:\\Program Files (x86)\\Microsoft SDKs\\F#\\10.1\\Framework\\v4.0\\fsc.exe\" --nologo --out:${file}.exe ${file} & ${file}.exe"
+				},
+				"playground.launch.fsharp(dotnetcore)": {
+					"type": "string", 
+					"default":"dotnet run --project vscode_playground_dotnetcore.fsproj ${file}"
 				}
 			}
 		}

@@ -1,13 +1,13 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as child_process  from 'child_process';
-import { FileSystemProvider } from 'vscode';
+import { FileSystemProvider } from 'vscode'; 
+import { isString } from 'util'; 
+import { getLanguageExtension } from './langconfig';
+import { getLanguageFiles } from './langconfig';
 import { Buffer } from 'buffer';
-import { isString } from 'util';
-
 
 
 const PLAYGROUND_NAME = "playground";  
@@ -35,12 +35,7 @@ export class Playground {
             if(!isString(vscode.workspace.getConfiguration("playground.launch").get(language))){
                 continue;
             }
-            let ext:string;
-            if(language === "csharp") { ext = "cs"; }
-            else if(language === "python") { ext="py"; }
-            else if(language === "javascript") { ext="js"; }
-            else if(language === "rust") { ext="rs"; }
-            else { ext = language; }
+            let ext:string = getLanguageExtension(language);
             tmp.push(new LanguagePickItem(language,ext));
         } 
         this.m_LanguageQuickPickItems = tmp;
@@ -61,12 +56,13 @@ export class Playground {
             return null;
         } 
 
-        let playgroundPath = (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).toRealFilePath(this.getPlaygroundUri(language.extension));
-        let resetFile:boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(language.extension) == -1;
+        let uri = this.getPlaygroundUri(language.label,language.extension,language.specifiedRuntime);
+        let playgroundPath = (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).toRealFilePath(uri);
+        let resetFile:boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(uri.path) == -1;
         if (resetFile) { 
-            return this.reset(language.extension); 
+            return this.reset(uri); 
         } else{
-            return this.show(language.extension);
+            return this.show(uri);
         } 
     }
 
@@ -74,34 +70,34 @@ export class Playground {
      * Run the playground code.
      * @param document 
      */
-    async runPlayground(document: vscode.TextDocument) { 
+    async runPlayground(document: vscode.TextDocument) {
         await document.save();
-        this.stop(); 
+        this.stop();
         this.m_OutputChannel.dispose();
         this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
-        this.m_OutputChannel.appendLine("Running."); 
-        let language = document.languageId;
-        let filepath = document.uri.path.substring(1);
-        let execScript = this.getExecScript(language,filepath); 
-        this.m_Process = child_process.spawn(execScript,{"shell":true,"cwd":this.m_PlaygroundDir}); 
-        this.m_Process.stdout.on('data',(data) => {
-            this.m_OutputChannel.append(data.toString());
-        });     
-        this.m_Process.stderr.on('data',(data) => { 
-            this.m_OutputChannel.append(data.toString());
-        });
-        this.m_Process.on('close',(code) => {
-            this.m_Process = undefined;
-            this.m_OutputChannel.appendLine(`\nExit with code=${code}.`);
-        });
+        this.m_OutputChannel.appendLine("Running.");
         this.m_OutputChannel.show(false);
+        let language = this.getLanguageFromUri(document.uri);
+        let filepath = document.uri.path.substring(1);
+        let execScript = this.getExecScript(language, filepath);
+        this.m_Process = child_process.spawn(execScript, { "shell": true, "cwd": this.m_PlaygroundDir });
+        this.m_Process.stdout.on('data', (data) => {
+            this.m_OutputChannel.append(data.toString());
+        });
+        this.m_Process.stderr.on('data', (data) => {
+            this.m_OutputChannel.append(data.toString());
+        });
+        this.m_Process.on('close', (code) => {
+            this.m_Process = undefined;
+            this.m_OutputChannel.appendLine(`\nExit with code ${code}.`);
+        });
+
     } 
 
-    getExecScript(language: string,filepath: string):string {
-        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME);
-        let script:string = conf.launch[language];
-        os.platform()
-        return script.replace(/\${file}/ig,filepath);
+    getExecScript(language: string, filepath: string): string {
+        let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME); 
+        let script: string = conf.launch[language];
+        return script.replace(/\${file}/ig, filepath);
     }
 
     async stop(){
@@ -112,24 +108,43 @@ export class Playground {
         }
     }
 
-    async reset(language:string): Promise<vscode.TextDocument> {  
-        // tslint:disable-next-line:curly
-        if(this.m_ResetFlag.indexOf(language) === -1)
-            this.m_ResetFlag.push(language);
-        let content = fs.readFileSync(path.join(this.m_extensionPath,`helloworlds/helloworld.${language}`));
-        let uri = this.getPlaygroundUri(language);
-        (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(uri,content,{"create":false,"overwrite":true}); 
-        return await this.show(language);
+    async reset(uri:vscode.Uri): Promise<vscode.TextDocument> {   
+        if(this.m_ResetFlag.indexOf(uri.path) === -1)
+            this.m_ResetFlag.push(uri.path);
+        let language = this.getLanguageFromUri(uri);
+        let files:Array<string> = [];
+        files.push(`${uri.path.substring(1)}?${uri.query}`);
+        files.push(...getLanguageFiles(language));
+        files.forEach(file => { 
+            let src = path.join(this.m_extensionPath,`playgrounds${path.sep}${file.split('?')[0]}`);
+            let dest = vscode.Uri.parse(`playground://root/${file}`)
+            let content = fs.readFileSync(src); 
+            (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(dest,content,{"create":false,"overwrite":true}); 
+        }); 
+        return await this.show(uri);
     } 
 
-    async show(language: string): Promise<vscode.TextDocument> { 
-        let editor = await vscode.window.showTextDocument(this.getPlaygroundUri(language)); 
+    async show(uri:vscode.Uri): Promise<vscode.TextDocument> { 
+        let editor = await vscode.window.showTextDocument(uri); 
         return editor.document;
+    }  
+
+    getPlaygroundUri(language: string, extension: string, runtime: string) {
+        return vscode.Uri.parse(`playground://root/vscode_playground${runtime == "" ? "" : `_${runtime}`}.${extension}?language=${language}&runtime=${runtime}`);
+    }
+    
+    getAttrFromUri(uri:vscode.Uri, attr:string): string{
+        let matches = uri.query.match(new RegExp(`${attr}=(.*?)&`));
+        return matches == null ? "" : matches[1];
     }
 
-    getPlaygroundUri(language:string){
-        return vscode.Uri.parse(`playground://root/vscode_playground.${language}`);
-    } 
+    getRuntimeFromUri(uri:vscode.Uri){
+        return this.getAttrFromUri(uri,'runtime');
+    }
+
+    getLanguageFromUri(uri:vscode.Uri){
+        return this.getAttrFromUri(uri,'language');
+    }
 }
 
 class LanguagePickItem implements vscode.QuickPickItem {
@@ -139,10 +154,20 @@ class LanguagePickItem implements vscode.QuickPickItem {
     picked?: boolean | undefined;
     alwaysShow?: boolean | undefined;
     extension: string;
+    specifiedRuntime: string;
 
     constructor(label: string,extension: string){
         this.label = label;
         this.extension = extension;
+        this.specifiedRuntime = this.resolveRuntime(label);
+    }
+
+    resolveRuntime(label: string):string {
+        var reg = RegExp(/\((.*?)\)/i);
+        if(reg.test(label) == false){
+            return '';
+        }
+        return (<RegExpExecArray>reg.exec(label))[1];
     }
 }
 
@@ -256,8 +281,12 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
         throw new Error("Method not implemented.");
     }
 
-    toRealFilePath(uri: vscode.Uri): string{
-        let filepath :string = this._baseDir + path.sep + uri.path.substr(1); 
+    toRealFilePath(uri: vscode.Uri | string): string {
+        let fspath = uri;
+        if (!isString(uri)) {
+            fspath = (<vscode.Uri>uri).path.substring(1);
+        }
+        let filepath: string = this._baseDir + path.sep + fspath;
         return filepath;
     }
 

@@ -7,12 +7,3 @@ export function mkdirSync(dir: string, options?: number | string | undefined) {
     }
     fs.mkdirSync(dir, options);
 }
-
-/*
-export function rmdirSync(dir: string){
-    if(!fs.existsSync(dir)){
-        return;
-    }
-    
-}
-*/

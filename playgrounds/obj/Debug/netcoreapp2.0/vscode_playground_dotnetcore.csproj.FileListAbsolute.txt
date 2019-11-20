@@ -1,0 +1,11 @@
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.csprojAssemblyReference.cache
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.csproj.CoreCompileInputs.cache
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.AssemblyInfoInputs.cache
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.AssemblyInfo.cs
+E:\Codes\PlaygroundCode\playgrounds\bin\Debug\netcoreapp2.0\vscode_playground_dotnetcore.deps.json
+E:\Codes\PlaygroundCode\playgrounds\bin\Debug\netcoreapp2.0\vscode_playground_dotnetcore.runtimeconfig.json
+E:\Codes\PlaygroundCode\playgrounds\bin\Debug\netcoreapp2.0\vscode_playground_dotnetcore.runtimeconfig.dev.json
+E:\Codes\PlaygroundCode\playgrounds\bin\Debug\netcoreapp2.0\vscode_playground_dotnetcore.dll
+E:\Codes\PlaygroundCode\playgrounds\bin\Debug\netcoreapp2.0\vscode_playground_dotnetcore.pdb
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.dll
+E:\Codes\PlaygroundCode\playgrounds\obj\Debug\netcoreapp2.0\vscode_playground_dotnetcore.pdb
