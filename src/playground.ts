@@ -112,12 +112,13 @@ export class Playground {
         if(this.m_ResetFlag.indexOf(uri.path) === -1)
             this.m_ResetFlag.push(uri.path);
         let language = this.getLanguageFromUri(uri);
-        let files:Array<string> = [];
-        files.push(`${uri.path.substring(1)}?${uri.query}`);
-        files.push(...getLanguageFiles(language));
+        let files:Array<[string,string]> = [];
+        files.push([`${uri.path.substring(1).replace(/\.(.*)$/,str => {return `_${str.substring(1)}`;})}`,`${uri.path.substring(1)}?${uri.query}`]);
+        files.push(...(<[[string,string]]>(getLanguageFiles(language).map(file=>[file,file]))));
+        
         files.forEach(file => { 
-            let src = path.join(this.m_extensionPath,`playgrounds${path.sep}${file.split('?')[0]}`);
-            let dest = vscode.Uri.parse(`playground://root/${file}`)
+            let src = path.join(this.m_extensionPath,`playgrounds${path.sep}${file[0]}`);
+            let dest = vscode.Uri.parse(`playground://root/${file[1]}`);
             let content = fs.readFileSync(src); 
             (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(dest,content,{"create":false,"overwrite":true}); 
         }); 

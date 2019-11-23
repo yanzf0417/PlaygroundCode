@@ -4,3 +4,5 @@ package-lock.json
 vsc-extension-quickstart.md
 src/test/
 out/
+playgrounds/bin
+playgrounds/obj

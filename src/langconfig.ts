@@ -32,7 +32,22 @@ export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
     "fsharp(dotnetcore)" : {
         "extension":"fs",
         "files":["vscode_playground_dotnetcore.fsproj"]
-    }
+    },
+    "sh(bash)" : {
+        "extension":"sh"
+    },
+    "sh(tcsh)" : {
+        "extension":"tcsh"
+    },
+    "julia" : {
+        "extension":"jl"
+    },
+    "erlang" : {
+        "extension":"erl"
+    },
+    "typescript" : {
+        "extension":"ts"
+    } 
 };
 
 export function getLanguageExtension(language:string):string{

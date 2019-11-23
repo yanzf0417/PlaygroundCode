@@ -8,7 +8,8 @@
 		"vscode": "^1.34.0"
 	},
 	"categories": [
-		"Other","Programming Languages"
+		"Other",
+		"Programming Languages"
 	],
 	"activationEvents": [
 		"onCommand:extension.playgroundcode"
@@ -20,7 +21,7 @@
 				"command": "extension.playgroundcode",
 				"title": "Playground",
 				"category": "Playground",
-				"icon":{
+				"icon": {
 					"dark": "assets/icon/dark/playground.svg",
 					"light": "assets/icon/light/playground.svg"
 				}
@@ -29,7 +30,7 @@
 				"command": "extension.playgroundrun",
 				"title": "Run playground code",
 				"category": "Playground",
-				"icon":{
+				"icon": {
 					"dark": "assets/icon/dark/run.svg",
 					"light": "assets/icon/light/run.svg"
 				}
@@ -38,7 +39,7 @@
 				"command": "extension.playgroundstop",
 				"title": "Stop playground process",
 				"category": "Playground",
-				"icon":{
+				"icon": {
 					"dark": "assets/icon/dark/stop.svg",
 					"light": "assets/icon/light/stop.svg"
 				}
@@ -47,7 +48,7 @@
 				"command": "extension.playgroundreset",
 				"title": "Reset playground code",
 				"category": "Playground",
-				"icon":{
+				"icon": {
 					"dark": "assets/icon/dark/reset.svg",
 					"light": "assets/icon/light/reset.svg"
 				}
@@ -55,7 +56,7 @@
 		],
 		"menus": {
 			"editor/title": [
-				{ 
+				{
 					"command": "extension.playgroundcode",
 					"group": "navigation@1"
 				},
@@ -88,36 +89,36 @@
 					"default": "php ${file}"
 				},
 				"playground.launch.python": {
-					"type": "string", 
-					"default":"python ${file}"
+					"type": "string",
+					"default": "python ${file}"
 				},
 				"playground.launch.javascript": {
-					"type": "string", 
-					"default":"node ${file}"
+					"type": "string",
+					"default": "node ${file}"
 				},
 				"playground.launch.lua": {
-					"type": "string", 
-					"default":"lua ${file}"
+					"type": "string",
+					"default": "lua ${file}"
 				},
 				"playground.launch.rust": {
-					"type": "string", 
-					"default":"rustc --crate-name playground_rust ${file} & playground_rust.exe"
+					"type": "string",
+					"default": "rustc --crate-name playground_rust ${file} & playground_rust.exe"
 				},
 				"playground.launch.java": {
-					"type": "string", 
-					"default":"javac ${file} & java vscode_playground"
+					"type": "string",
+					"default": "javac ${file} & java vscode_playground"
 				},
 				"playground.launch.ruby": {
-					"type": "string", 
-					"default":"ruby ${file}"
+					"type": "string",
+					"default": "ruby ${file}"
 				},
 				"playground.launch.bat": {
-					"type": "string", 
-					"default":"${file}"
+					"type": "string",
+					"default": "${file}"
 				},
 				"playground.launch.powershell": {
-					"type": "string", 
-					"default":"powershell.exe .\\${file}"
+					"type": "string",
+					"default": "powershell.exe .\\${file}"
 				},
 				"playground.launch.csharp": {
 					"type": "string",
@@ -128,16 +129,48 @@
 					"default": "dotnet run --project vscode_playground_dotnetcore.csproj --main ${file}"
 				},
 				"playground.launch.fsharp": {
-					"type": "string", 
-					"default":"\"C:\\Program Files (x86)\\Microsoft SDKs\\F#\\10.1\\Framework\\v4.0\\fsc.exe\" --nologo --out:${file}.exe ${file} & ${file}.exe"
+					"type": "string",
+					"default": "\"C:\\Program Files (x86)\\Microsoft SDKs\\F#\\10.1\\Framework\\v4.0\\fsc.exe\" --nologo --out:${file}.exe ${file} & ${file}.exe"
 				},
 				"playground.launch.fsharp(dotnetcore)": {
-					"type": "string", 
-					"default":"dotnet run --project vscode_playground_dotnetcore.fsproj ${file}"
+					"type": "string",
+					"default": "dotnet run --project vscode_playground_dotnetcore.fsproj ${file}"
+				},
+				"playground.launch.scala": {
+					"type": "string",
+					"default": "scala ${file}"
+				},
+				"playground.launch.sh(bash)": {
+					"type": "string",
+					"default": "sh ${file}"
+				},
+				"playground.launch.sh(tcsh)": {
+					"type": "string",
+					"default": "tcsh ${file}"
+				},
+				"playground.launch.R": {
+					"type": "string",
+					"default": "Rscript ${file}"
+				},
+				"playground.launch.perl": {
+					"type": "string",
+					"default": "perl ${file}"
+				},
+				"playground.launch.julia": {
+					"type": "string",
+					"default": "julia ${file}"
+				},
+				"playground.launch.erlang": {
+					"type": "string",
+					"default": "erlc ${file} & erl -noshell -s vscode_playground main -s init stop"
+				},
+				"playground.launch.typescript": {
+					"type": "string",
+					"default": "tsc ${file} --outFile ${file}.js & node ${file}.js"
 				}
 			}
 		}
-	}, 
+	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
@@ -160,5 +193,7 @@
 		"reflect-metadata": "^0.1.13",
 		"tree-kill": "^1.2.1"
 	},
-	"files": ["helloworlds/"]
+	"files": [
+		"helloworlds/"
+	]
 }
