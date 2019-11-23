@@ -9,7 +9,7 @@ import * as path from 'path';
  
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
-	let tmpdir = `${os.tmpdir()}${path.sep}vscode_playground`; 
+	let tmpdir = `${os.tmpdir()}${path.sep}vscode_playground`;  
 	playground = new pg.Playground(context.extensionPath); 
 	playground.setPlaygroundDir(tmpdir); 
 
@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let disposableCommandRun = vscode.commands.registerTextEditorCommand('extension.playgroundrun',(editor) => {
 		if(editor.document.uri.scheme == "playground")
-		codeDocument = editor.document; 
+			codeDocument = editor.document; 
 		playground.runPlayground(<vscode.TextDocument>codeDocument);
 	});
 

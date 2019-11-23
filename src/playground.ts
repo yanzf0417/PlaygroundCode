@@ -7,7 +7,6 @@ import { FileSystemProvider } from 'vscode';
 import { isString } from 'util'; 
 import { getLanguageExtension } from './langconfig';
 import { getLanguageFiles } from './langconfig';
-import { Buffer } from 'buffer';
 
 
 const PLAYGROUND_NAME = "playground";  
@@ -19,6 +18,7 @@ export class Playground {
     private m_ResetFlag: Array<string>;
     private m_LanguageQuickPickItems?: Array<LanguagePickItem>;
     private m_extensionPath: string;
+    private m_Running: boolean;
 
 
     constructor(extensionPath: string) {   
@@ -26,6 +26,7 @@ export class Playground {
         this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
         this.m_ResetFlag = new Array<string>();
         this.m_PlaygroundDir = ''; 
+        this.m_Running = false;
         this.initLanguageQuickPickItems(); 
     } 
 
@@ -71,8 +72,9 @@ export class Playground {
      * @param document 
      */
     async runPlayground(document: vscode.TextDocument) {
+        if(this.m_Running) return;
+        this.m_Running = true;
         await document.save();
-        this.stop();
         this.m_OutputChannel.dispose();
         this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
         this.m_OutputChannel.appendLine("Running.");
@@ -90,6 +92,7 @@ export class Playground {
         this.m_Process.on('close', (code) => {
             this.m_Process = undefined;
             this.m_OutputChannel.appendLine(`\nExit with code ${code}.`);
+            this.m_Running = false;
         });
 
     } 
@@ -105,6 +108,7 @@ export class Playground {
             this.m_OutputChannel.appendLine("Process killed.");
             const treekill = require('tree-kill'); 
             treekill(this.m_Process.pid); 
+            this.m_Running = false;
         }
     }
 
