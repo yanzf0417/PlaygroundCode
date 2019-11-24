@@ -9,7 +9,8 @@ import * as path from 'path';
  
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
-	let tmpdir = `${os.tmpdir()}${path.sep}vscode_playground`;  
+	let tmpdir: string = vscode.workspace.getConfiguration("playground").get<string>("TemporaryFolder") || `${os.tmpdir()}${path.sep}vscode_playground`;  
+	console.log(tmpdir);
 	playground = new pg.Playground(context.extensionPath); 
 	playground.setPlaygroundDir(tmpdir); 
 
@@ -42,7 +43,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-	console.log('Bye,helloworld!');  
+export function deactivate() { 
 }
 
