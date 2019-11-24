@@ -3,7 +3,7 @@
 	"displayName": "PlaygroundCode",
 	"description": "Create a playground editor to run code. This is an easy way for some situations, such as test a code snippet, validate algorithm and so on.",
 	"publisher": "yanzf",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"icon": "https://github.com/yanzf0417/assets/blob/master/playground/icon.png?raw=true",
 	"engines": {
 		"vscode": "^1.32.0"
@@ -81,8 +81,8 @@
 		"configuration": {
 			"title": "Playground",
 			"properties": {
-				"playground.TemporaryFolder":{
-					"type":"string",
+				"playground.TemporaryFolder": {
+					"type": "string",
 					"description": "Set the folder to save temporary playground files. Please note that you should reopen VSCode after config the temporary folder."
 				},
 				"playground.launch.go": {
@@ -107,7 +107,7 @@
 				},
 				"playground.launch.rust": {
 					"type": "string",
-					"default": "rustc --crate-name playground_rust ${file} && playground_rust.exe" 
+					"default": "rustc --crate-name playground_rust ${file} && playground_rust.exe"
 				},
 				"playground.launch.java": {
 					"type": "string",
