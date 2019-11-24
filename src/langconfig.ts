@@ -47,7 +47,10 @@ export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
     },
     "typescript" : {
         "extension":"ts"
-    } 
+    },
+    "kotlin" : {
+        "extension":"kt"
+    }
 };
 
 export function getLanguageExtension(language:string):string{

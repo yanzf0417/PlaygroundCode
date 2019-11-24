@@ -102,7 +102,7 @@
 				},
 				"playground.launch.rust": {
 					"type": "string",
-					"default": "rustc --crate-name playground_rust ${file} & playground_rust.exe"
+					"default": "rustc --crate-name playground_rust ${file} && playground_rust.exe"
 				},
 				"playground.launch.java": {
 					"type": "string",
@@ -130,7 +130,7 @@
 				},
 				"playground.launch.fsharp": {
 					"type": "string",
-					"default": "\"C:\\Program Files (x86)\\Microsoft SDKs\\F#\\10.1\\Framework\\v4.0\\fsc.exe\" --nologo --out:${file}.exe ${file} & ${file}.exe"
+					"default": "\"C:\\Program Files (x86)\\Microsoft SDKs\\F#\\10.1\\Framework\\v4.0\\fsc.exe\" --nologo --out:${file}.exe ${file} && ${file}.exe"
 				},
 				"playground.launch.fsharp(dotnetcore)": {
 					"type": "string",
@@ -167,6 +167,14 @@
 				"playground.launch.typescript": {
 					"type": "string",
 					"default": "tsc ${file} --outFile ${file}.js && node ${file}.js"
+				},
+				"playground.launch.kotlin": {
+					"type": "string",
+					"default": "kotlinc ${file} -include-runtime -d ${file}.jar && java -jar ${file}.jar"
+				},
+				"playground.launch.groovy": {
+					"type": "string",
+					"default": "groovy -c utf8 ${file}"
 				}
 			}
 		}

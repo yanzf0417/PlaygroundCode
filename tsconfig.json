@@ -18,6 +18,7 @@
 		"node_modules",
 		".vscode-test",
 		"playgrounds/bin",
-		"playgrounds/obj"
+		"playgrounds/obj",
+		"playgrounds/*"
 	]
 }
