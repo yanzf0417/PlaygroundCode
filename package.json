@@ -1,7 +1,7 @@
 {
-	"name": "com.yanzf.playgroundcode",
+	"name": "com-yanzf-playgroundcode",
 	"displayName": "PlaygroundCode",
-	"description": "",
+	"description": "Create a playground editor to run code. This is an easy way for some situations, such as test a code snippet, validate algorithm and so on.",
 	"publisher": "yanzf",
 	"version": "1.0.0",
 	"engines": {
