@@ -26,6 +26,11 @@ Make sure the language you want to run has been installed on your system. Such a
 ![config](https://github.com/yanzf0417/assets/blob/master/playground/config_temporaryfolder.gif?raw=true)
 > The temporary folder is used to save the playground file that you run.
 
+## Keyboard Shortcuts
+
+- ```Ctrl+P+C```  Create playground code.
+- ```Ctrl+F5```  Run playground code.
+
 ## Known Issues
 
 - For Windows System, the output channel would be garbled if your code were occurred error.
@@ -37,5 +42,9 @@ Users appreciate release notes as you update your extension.
 ### 1.0.0
 
 Initial release of PlaygroundCode.
+
+### 1.0.1
+
+Support Keyboard Shortcuts.
 
 **Enjoy!**

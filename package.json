@@ -55,6 +55,17 @@
 				}
 			}
 		],
+		"keybindings":[
+			{
+				"command": "extension.playgroundcode",
+				"key": "Ctrl+P C" 
+			},
+			{
+				"command": "extension.playgroundrun",
+				"key": "Ctrl+F5",
+				"when": "resourceScheme == playground"
+			}
+		],
 		"menus": {
 			"editor/title": [
 				{
