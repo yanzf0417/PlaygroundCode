@@ -24,7 +24,7 @@ Make sure the language you want to run has been installed on your system. Such a
 
 ### Config temporary folder 
 ![config](https://github.com/yanzf0417/assets/blob/master/playground/config_temporaryfolder.gif?raw=true)
-> The temporary folder is used to save the playground file that you run.
+> The temporary folder is used to save the playground file that you run. Please note that you should reopen the VSCode after set the temporary folder.
 
 ## Keyboard Shortcuts
 
@@ -46,5 +46,9 @@ Initial release of PlaygroundCode.
 ### 1.0.1
 
 Support Keyboard Shortcuts.
+
+### 1.0.2
+
+Bug Fixed.
 
 **Enjoy!**
