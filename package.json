@@ -3,7 +3,7 @@
 	"displayName": "PlaygroundCode",
 	"description": "Create a playground editor to run code. This is an easy way for some situations, such as test a code snippet, validate algorithm and so on.",
 	"publisher": "yanzf",
-	"version": "1.0.1",
+	"version": "1.0.0",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.32.0"
