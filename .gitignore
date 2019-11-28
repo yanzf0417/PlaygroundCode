@@ -6,3 +6,4 @@ src/test/
 out/
 playgrounds/bin
 playgrounds/obj
+*.vsix

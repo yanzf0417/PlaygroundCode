@@ -191,6 +191,10 @@
 				"playground.launch.groovy": {
 					"type": "string",
 					"default": "groovy -c utf8 ${file}"
+				},
+				"playground.launch.dart": {
+					"type": "string",
+					"default": "dart ${file}"
 				}
 			}
 		}

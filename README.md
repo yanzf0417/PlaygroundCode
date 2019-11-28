@@ -51,4 +51,8 @@ Support Keyboard Shortcuts.
 
 Bug Fixed.
 
+### 1.0.3
+
+Support Dart-Playground.
+
 **Enjoy!**
