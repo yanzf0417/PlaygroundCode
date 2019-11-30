@@ -31,15 +31,24 @@ export class Playground {
     }
 
     initLanguageQuickPickItems() {
-        let tmp = new Array<LanguagePickItem>();
+        let languages = new Array<LanguagePickItem>();
         for (const language in vscode.workspace.getConfiguration("playground.launch")) {
             if (!isString(vscode.workspace.getConfiguration("playground.launch").get(language))) {
                 continue;
             }
             let ext: string = getLanguageExtension(language);
-            tmp.push(new LanguagePickItem(language, ext));
+            languages.push(new LanguagePickItem(language, ext));
         }
-        this.m_LanguageQuickPickItems = tmp;
+        for (let i = 0; i < languages.length; i++) {
+            for (let j = languages.length - 1; j > i; j--) {
+                if (languages[j].label < languages[j - 1].label) {
+                    let tmp = languages[j - 1];
+                    languages[j - 1] = languages[j];
+                    languages[j] = tmp;
+                }
+            }
+        }
+        this.m_LanguageQuickPickItems = languages;
     }
 
     setPlaygroundDir(dirname: string): PlaygroundFileSystemProvider {

@@ -10,7 +10,6 @@ import * as path from 'path';
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
 	let tmpdir: string = vscode.workspace.getConfiguration("playground").get<string>("TemporaryFolder") || `${os.tmpdir()}${path.sep}vscode_playground`;  
-	console.log(tmpdir);
 	playground = new pg.Playground(context.extensionPath); 
 	playground.setPlaygroundDir(tmpdir); 
 
@@ -21,8 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
 	}); 
 
 	let disposableCommandRun = vscode.commands.registerTextEditorCommand('extension.playgroundrun',(editor) => {
-		if(editor.document.uri.scheme == "playground")
-			codeDocument = editor.document; 
+		if(editor.document.uri.scheme == "playground") {
+			codeDocument = editor.document;
+		} 
 		playground.runPlayground(<vscode.TextDocument>codeDocument);
 	});
 
@@ -31,8 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let disposableCommandReset = vscode.commands.registerTextEditorCommand('extension.playgroundreset',(editor) => {
-		if(editor.document.uri.scheme == "playground")
-		codeDocument = editor.document; 
+		if(editor.document.uri.scheme == "playground") {
+			codeDocument = editor.document;
+		} 
 		playground.reset((<vscode.TextDocument>codeDocument).uri);
 	});
 

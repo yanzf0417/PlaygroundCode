@@ -55,4 +55,8 @@ Bug Fixed.
 
 Support Dart-Playground.
 
+### 1.0.4
+
+Sort the language list.
+
 **Enjoy!**
