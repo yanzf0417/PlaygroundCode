@@ -37,8 +37,6 @@ Make sure the language you want to run has been installed on your system. Such a
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
 Initial release of PlaygroundCode.
@@ -58,5 +56,9 @@ Support Dart-Playground.
 ### 1.0.4
 
 Sort the language list.
+
+### 1.0.5
+
+Support D Language-Playground.
 
 **Enjoy!**

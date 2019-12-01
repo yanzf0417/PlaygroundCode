@@ -50,6 +50,9 @@ export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
     },
     "kotlin" : {
         "extension":"kt"
+    },
+    "D" : {
+        "extension":"d"
     }
 };
 

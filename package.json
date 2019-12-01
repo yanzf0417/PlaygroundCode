@@ -195,6 +195,10 @@
 				"playground.launch.dart": {
 					"type": "string",
 					"default": "dart ${file}"
+				},
+				"playground.launch.D": {
+					"type": "string",
+					"default": "dmd -run ${file}"
 				}
 			}
 		}
