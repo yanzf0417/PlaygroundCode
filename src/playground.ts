@@ -62,13 +62,13 @@ export class Playground {
 
     async createPlayground(): Promise<vscode.TextDocument | null> {
         let language = await vscode.window.showQuickPick<LanguagePickItem>(<Array<LanguagePickItem>>this.m_LanguageQuickPickItems, { canPickMany: false });
-        if (language == undefined) {
+        if (language === undefined) {
             return null;
         }
 
         let uri = this.getPlaygroundUri(language.label, language.extension, language.specifiedRuntime);
         let playgroundPath = (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).toRealFilePath(uri);
-        let resetFile: boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(uri.path) == -1;
+        let resetFile: boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(uri.path) === -1;
         if (resetFile) {
             return this.reset(uri);
         } else {
@@ -125,12 +125,12 @@ export class Playground {
             this.m_ResetFlag.push(uri.path);
         let language = this.getLanguageFromUri(uri);
         let files: Array<string> = [];
-        files.push(`${uri.path.substring(1)}?${uri.query}`);
+        files.push(`${uri.path.substring(1)}.playgroundext?${uri.query}`);
         files.push(...getLanguageFiles(language));
 
         files.forEach(file => {
             let src = path.join(this.m_extensionPath, `playgrounds${path.sep}${file.split('?')[0]}`);
-            let dest = vscode.Uri.parse(`playground://root/${file}`);
+            let dest = vscode.Uri.parse(`playground://root/${file.replace(".playgroundext", "")}`);
             let content = fs.readFileSync(src);
             (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(dest, content, { "create": false, "overwrite": true });
         });
@@ -143,7 +143,7 @@ export class Playground {
     }
 
     getPlaygroundUri(language: string, extension: string, runtime: string) {
-        return vscode.Uri.parse(`playground://root/vscode_playground${runtime == "" ? "" : `_${runtime}`}.${extension}?language=${language}&runtime=${runtime}`);
+        return vscode.Uri.parse(`playground://root/vscode_playground${runtime === "" ? "" : `_${runtime}`}.${extension}?language=${language}&runtime=${runtime}`);
     }
 
     getAttrFromUri(uri: vscode.Uri, attr: string): string {
@@ -177,7 +177,7 @@ class LanguagePickItem implements vscode.QuickPickItem {
 
     resolveRuntime(label: string): string {
         var reg = RegExp(/\((.*?)\)/i);
-        if (reg.test(label) == false) {
+        if (reg.test(label) === false) {
             return '';
         }
         return (<RegExpExecArray>reg.exec(label))[1];

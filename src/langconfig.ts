@@ -9,7 +9,7 @@ export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
     },
     "csharp(dotnetcore)" : {
         "extension":"cs",
-        "files":["vscode_playground_dotnetcore.csproj"]
+        "files":["vscode_playground_dotnetcore.csproj.playgroundext"]
     },
     "python" : {
         "extension":"py"
@@ -31,7 +31,7 @@ export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
     },
     "fsharp(dotnetcore)" : {
         "extension":"fs",
-        "files":["vscode_playground_dotnetcore.fsproj"]
+        "files":["vscode_playground_dotnetcore.fsproj.playgroundext"]
     },
     "sh(bash)" : {
         "extension":"sh"
