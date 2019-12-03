@@ -61,4 +61,8 @@ Sort the language list.
 
 Support D Language-Playground.
 
+### 1.0.6
+
+Bug Fixed.
+
 **Enjoy!**
