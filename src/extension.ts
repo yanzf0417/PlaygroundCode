@@ -25,7 +25,13 @@ export function activate(context: vscode.ExtensionContext) {
 		} 
 		playground.runPlayground(<vscode.TextDocument>codeDocument);
 	});
-
+	let disposableCommandRunterminal = vscode.commands.registerTextEditorCommand('extension.playgroundrunterminal',(editor) => {
+		if(editor.document.uri.scheme == "playground") {
+			codeDocument = editor.document;
+		} 
+		playground.runPlaygroundInterminal(<vscode.TextDocument>codeDocument);
+	});
+	
 	let disposableCommandStop = vscode.commands.registerTextEditorCommand('extension.playgroundstop',() => {
 		playground.stop();
 	});
@@ -39,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposableCommandNew);
 	context.subscriptions.push(disposableCommandRun);
+	context.subscriptions.push(disposableCommandRunterminal);
 	context.subscriptions.push(disposableCommandStop);
 	context.subscriptions.push(disposableCommandReset);
 }

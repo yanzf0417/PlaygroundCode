@@ -105,18 +105,53 @@ export class Playground {
         });
     }
 
+    async runPlaygroundInterminal(document: vscode.TextDocument) {
+        if (document.isDirty) await document.save();
+        let filepath = document.uri.path.substring(1);
+        let language = this.getLanguageFromUri(document.uri);
+        let execScript = this.getExecScript(language, filepath);
+        let terminal = this.getPlaygroundTerminal(this.m_PlaygroundDir);
+        terminal.show(true);
+        terminal.sendText(execScript, true);  
+    }
+
+    getPlaygroundTerminal(cwd: string): vscode.Terminal {
+        for (let index = 0; index < vscode.window.terminals.length; index++) {
+            const terminal = vscode.window.terminals[index];
+            if (terminal.name === "playground") {
+                return terminal;
+            }
+        }
+        return vscode.window.createTerminal({ "name": "playground", "cwd": cwd });
+    }
+
     getExecScript(language: string, filepath: string): string {
         let conf = vscode.workspace.getConfiguration(PLAYGROUND_NAME);
         let script: string = conf.launch[language];
         return script.replace(/\${file}/ig, filepath);
     }
 
-    async stop() {
+    stop() {
+        this.stopRunOutputChannel();
+        this.stopRunTerminal();
+    }
+
+    stopRunOutputChannel(){
         if (this.m_Process !== undefined) {
-            this.m_OutputChannel.appendLine("Process killed.");
             const treekill = require('tree-kill');
             treekill(this.m_Process.pid);
             this.m_Running = false;
+            this.m_OutputChannel.appendLine("Process killed.");
+        }
+    }
+
+    stopRunTerminal(){
+        for (let index = 0; index < vscode.window.terminals.length; index++) {
+            const terminal = vscode.window.terminals[index];
+            if (terminal.name === "playground") { 
+                terminal.dispose();
+                break;
+            }
         }
     }
 

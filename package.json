@@ -29,11 +29,20 @@
 			},
 			{
 				"command": "extension.playgroundrun",
-				"title": "Run playground code",
+				"title": "Run playground code in output channel",
 				"category": "Playground",
 				"icon": {
 					"dark": "assets/icon/dark/run.svg",
 					"light": "assets/icon/light/run.svg"
+				}
+			},
+			{
+				"command": "extension.playgroundrunterminal",
+				"title": "Run playground code in terminal",
+				"category": "Playground",
+				"icon": {
+					"dark": "assets/icon/dark/run_terminal.svg",
+					"light": "assets/icon/light/run_terminal.svg"
 				}
 			},
 			{
@@ -79,13 +88,18 @@
 				},
 				{
 					"when": "resourceScheme == playground",
-					"command": "extension.playgroundstop",
+					"command": "extension.playgroundrunterminal",
 					"group": "navigation@3"
 				},
 				{
 					"when": "resourceScheme == playground",
-					"command": "extension.playgroundreset",
+					"command": "extension.playgroundstop",
 					"group": "navigation@4"
+				},
+				{
+					"when": "resourceScheme == playground",
+					"command": "extension.playgroundreset",
+					"group": "navigation@5"
 				}
 			]
 		},

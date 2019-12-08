@@ -65,4 +65,9 @@ Support D Language-Playground.
 
 Bug Fixed.
 
+### 1.1.0
+
+1.Support run in terminal.
+2.Bug Fixed.
+
 **Enjoy!**
