@@ -1,5 +1,6 @@
 # Playground Code
 Create a playground editor to run code. This is an easy way for some situations, such as test a code snippet, validate algorithm and so on.
+[Extension Main Page](https://marketplace.visualstudio.com/items?itemName=yanzf.PlaygroundCode&ssr=false#overview)
 
 ## Features
 
@@ -68,6 +69,6 @@ Bug Fixed.
 ### 1.1.0
 
 1.Support run in terminal.
-2.Bug Fixed.
+2.Bug Fixed. 
 
 **Enjoy!**
