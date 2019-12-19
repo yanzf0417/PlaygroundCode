@@ -11,7 +11,7 @@ import { getLanguageFiles } from './langconfig';
 
 const PLAYGROUND_NAME = "playground";
 export class Playground {
-    public m_FileSystemProvider?: PlaygroundFileSystemProvider;
+    public m_FileSystemProvider: PlaygroundFileSystemProvider;
     private m_PlaygroundDir: string;
     private m_OutputChannel: vscode.OutputChannel;
     private m_Process?: child_process.ChildProcess;
@@ -21,13 +21,14 @@ export class Playground {
     private m_Running: boolean;
 
 
-    constructor(extensionPath: string) {
+    constructor(extensionPath: string, dirname: string) {
         this.m_extensionPath = extensionPath;
         this.m_OutputChannel = vscode.window.createOutputChannel(PLAYGROUND_NAME);
         this.m_ResetFlag = new Array<string>();
         this.m_PlaygroundDir = '';
         this.m_Running = false;
         this.initLanguageQuickPickItems();
+        this.m_FileSystemProvider = this.setPlaygroundDir(dirname);
     }
 
     initLanguageQuickPickItems() {
@@ -67,7 +68,7 @@ export class Playground {
         }
 
         let uri = this.getPlaygroundUri(language.label, language.extension, language.specifiedRuntime);
-        let playgroundPath = (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).toRealFilePath(uri);
+        let playgroundPath = this.m_FileSystemProvider.toRealFilePath(uri);
         let resetFile: boolean = !fs.existsSync(playgroundPath) || this.m_ResetFlag.indexOf(uri.path) === -1;
         if (resetFile) {
             return this.reset(uri);
@@ -112,7 +113,7 @@ export class Playground {
         let execScript = this.getExecScript(language, filepath);
         let terminal = this.getPlaygroundTerminal(this.m_PlaygroundDir);
         terminal.show(true);
-        terminal.sendText(execScript, true);  
+        terminal.sendText(execScript, true);
     }
 
     getPlaygroundTerminal(cwd: string): vscode.Terminal {
@@ -136,7 +137,7 @@ export class Playground {
         this.stopRunTerminal();
     }
 
-    stopRunOutputChannel(){
+    stopRunOutputChannel() {
         if (this.m_Process !== undefined) {
             const treekill = require('tree-kill');
             treekill(this.m_Process.pid);
@@ -145,10 +146,10 @@ export class Playground {
         }
     }
 
-    stopRunTerminal(){
+    stopRunTerminal() {
         for (let index = 0; index < vscode.window.terminals.length; index++) {
             const terminal = vscode.window.terminals[index];
-            if (terminal.name === "playground") { 
+            if (terminal.name === "playground") {
                 terminal.dispose();
                 break;
             }
@@ -157,24 +158,39 @@ export class Playground {
 
     async reset(uri: vscode.Uri): Promise<vscode.TextDocument> {
         if (this.m_ResetFlag.indexOf(uri.path) === -1)
-            this.m_ResetFlag.push(uri.path);
+            this.m_ResetFlag.push(uri.path); 
+        this.resetFiles(uri);
+        this.reloadContent(uri);
+        return await this.show(uri);
+    }
+
+    async resetFiles(uri: vscode.Uri){
         let language = this.getLanguageFromUri(uri);
         let files: Array<string> = [];
         files.push(`${uri.path.substring(1)}.playgroundext?${uri.query}`);
         files.push(...getLanguageFiles(language));
-
         files.forEach(file => {
             let src = path.join(this.m_extensionPath, `playgrounds${path.sep}${file.split('?')[0]}`);
             let dest = vscode.Uri.parse(`playground://root/${file.replace(".playgroundext", "")}`);
             let content = fs.readFileSync(src);
-            (<PlaygroundFileSystemProvider>this.m_FileSystemProvider).writeFile(dest, content, { "create": false, "overwrite": true });
-        });
-        return await this.show(uri);
+            this.m_FileSystemProvider.writeFile(dest, content, { "create": false, "overwrite": true });
+        });  
     }
 
-    async show(uri: vscode.Uri): Promise<vscode.TextDocument> {
-        let editor = await vscode.window.showTextDocument(uri);
-        return editor.document;
+    async reloadContent(uri: vscode.Uri){
+        let editor = await vscode.window.showTextDocument(uri); 
+        let document = editor.document;
+        editor.edit((textEdit) => {
+            textEdit.replace(
+                new vscode.Range(document.positionAt(0),document.positionAt(document.getText().length)),
+                this.m_FileSystemProvider.readFile(uri).toString()
+                );
+        });
+        await editor.document.save(); 
+    }
+
+    async show(uri: vscode.Uri): Promise<vscode.TextDocument> { 
+        return (await vscode.window.showTextDocument(uri)).document;
     }
 
     getPlaygroundUri(language: string, extension: string, runtime: string) {
@@ -298,7 +314,6 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
             }
         }
         return list;
-
     }
 
     createDirectory(uri: vscode.Uri): void | Thenable<void> {
@@ -325,6 +340,7 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
             fs.rmdirSync(filepath);
         }
     }
+
     rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
         throw new Error("Method not implemented.");
     }

@@ -9,12 +9,11 @@ import * as path from 'path';
  
 let playground : pg.Playground;
 export function activate(context: vscode.ExtensionContext) {
-	let tmpdir: string = vscode.workspace.getConfiguration("playground").get<string>("TemporaryFolder") || `${os.tmpdir()}${path.sep}vscode_playground`;  
-	playground = new pg.Playground(context.extensionPath); 
-	playground.setPlaygroundDir(tmpdir); 
-
+	let tmpdir: string = vscode.workspace.getConfiguration("playground").get<string>("TemporaryFolder") || `${os.tmpdir()}${path.sep}vscode_playground`;
+	playground = new pg.Playground(context.extensionPath, tmpdir);  
 	vscode.workspace.registerFileSystemProvider("playground",<pg.PlaygroundFileSystemProvider>playground.m_FileSystemProvider);
 	let codeDocument : vscode.TextDocument | null; 
+	
 	let disposableCommandNew = vscode.commands.registerCommand('extension.playgroundcode', async () => {  
 		codeDocument = await playground.createPlayground(); 
 	}); 

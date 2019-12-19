@@ -38,37 +38,41 @@ Make sure the language you want to run has been installed on your system. Such a
 
 ## Release Notes
 
-### 1.0.0
+### 1.1.2
 
-Initial release of PlaygroundCode.
-
-### 1.0.1
-
-Support Keyboard Shortcuts.
-
-### 1.0.2
-
-Bug Fixed.
-
-### 1.0.3
-
-Support Dart-Playground.
-
-### 1.0.4
-
-Sort the language list.
-
-### 1.0.5
-
-Support D Language-Playground.
-
-### 1.0.6
-
-Bug Fixed.
+1.Bug Fixed. 
 
 ### 1.1.0
 
 1.Support run in terminal.
 2.Bug Fixed. 
+
+### 1.0.6
+
+Bug Fixed.
+
+### 1.0.5
+
+Support D Language-Playground.
+
+### 1.0.4
+
+Sort the language list.
+
+### 1.0.3
+
+Support Dart-Playground.
+
+### 1.0.2
+
+Bug Fixed.
+
+### 1.0.1
+
+Support Keyboard Shortcuts.
+
+### 1.0.0
+
+Initial release of PlaygroundCode.
 
 **Enjoy!**
