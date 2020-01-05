@@ -1,65 +1,66 @@
 export interface LanguageConfiguration {
-    extension?:string;
-    files?:Array<string>
-} 
+    extension?: string;
+    files?: Array<string>
+}
 
-export const languageConfigs:{[key:string]:LanguageConfiguration;} = {
-    "csharp" : {
-        "extension":"cs"
+export const languageConfigs: { [key: string]: LanguageConfiguration; } = {
+    "csharp": {
+        "extension": "cs"
     },
-    "csharp(dotnetcore)" : {
-        "extension":"cs",
-        "files":["vscode_playground_dotnetcore.csproj.playgroundext"]
+    "csharp(dotnetcore)": {
+        "extension": "cs",
+        "files": ["vscode_playground_dotnetcore.csproj.playgroundext"]
     },
-    "python" : {
-        "extension":"py"
+    "python": {
+        "extension": "py"
     },
-    "javascript" : {
-        "extension":"js"
+    "javascript": {
+        "extension": "js"
     },
-    "rust" : {
-        "extension":"rs"
+    "rust": {
+        "extension": "rs"
     },
-    "ruby" : {
-        "extension":"rb"
+    "ruby": {
+        "extension": "rb"
     },
-    "powershell" : {
-        "extension":"ps1"
+    "powershell": {
+        "extension": "ps1"
     },
-    "fsharp" : {
-        "extension":"fs"
+    "fsharp": {
+        "extension": "fs"
     },
-    "fsharp(dotnetcore)" : {
-        "extension":"fs",
-        "files":["vscode_playground_dotnetcore.fsproj.playgroundext"]
+    "fsharp(dotnetcore)": {
+        "extension": "fs",
+        "files": ["vscode_playground_dotnetcore.fsproj.playgroundext"]
     },
-    "sh(bash)" : {
-        "extension":"sh"
+    "sh(bash)": {
+        "extension": "sh"
     },
-    "sh(tcsh)" : {
-        "extension":"tcsh"
+    "sh(tcsh)": {
+        "extension": "tcsh"
     },
-    "julia" : {
-        "extension":"jl"
+    "julia": {
+        "extension": "jl"
     },
-    "erlang" : {
-        "extension":"erl"
+    "erlang": {
+        "extension": "erl"
     },
-    "typescript" : {
-        "extension":"ts"
+    "typescript": {
+        "extension": "typescript.ts",
+        "files": ["tsconfig.json.playgroundext"]
     },
-    "kotlin" : {
-        "extension":"kt"
+    "kotlin": {
+        "extension": "kt"
     },
-    "D" : {
-        "extension":"d"
+    "D": {
+        "extension": "d"
     }
 };
 
-export function getLanguageExtension(language:string):string{
+export function getLanguageExtension(language: string): string {
     return (languageConfigs[language] && languageConfigs[language].extension) || language;
 }
 
-export function getLanguageFiles(language:string):Array<string>{
+export function getLanguageFiles(language: string): Array<string> {
     return (languageConfigs[language] && languageConfigs[language].files) || [];
 }
