@@ -199,7 +199,7 @@
 				},
 				"playground.launch.typescript": {
 					"type": "string",
-					"default": "tsc  ${file} & node ${file}.js"
+					"default": "tsc  ${file} & node vscode_playground.typescript.js"
 				},
 				"playground.launch.kotlin": {
 					"type": "string",
