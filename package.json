@@ -3,7 +3,7 @@
 	"displayName": "PlaygroundCode",
 	"description": "Create a playground editor to run code. This is an easy way for some situations, such as test a code snippet, validate algorithm and so on.",
 	"publisher": "yanzf",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"icon": "icon.png",
 	"repository": {
 		"url": "https://github.com/yanzf0417/PlaygroundCode"
