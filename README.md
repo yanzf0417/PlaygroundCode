@@ -38,6 +38,12 @@ Make sure the language you want to run has been installed on your system. Such a
 
 ## Release Notes
 
+### 1.1.5
+
+1.Put playground file to the separate folder.
+
+2.Bug Fixed. 
+
 ### 1.1.4
 
 1.Bug Fixed. 
@@ -53,6 +59,7 @@ Make sure the language you want to run has been installed on your system. Such a
 ### 1.1.0
 
 1.Support run in terminal.
+
 2.Bug Fixed. 
 
 ### 1.0.6
