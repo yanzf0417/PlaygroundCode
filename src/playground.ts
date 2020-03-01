@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as child_process from 'child_process';
 import { FileSystemProvider } from 'vscode';
-import { isString, isObject } from 'util';
-import { getLanguageExtension, languageConfigs } from './langconfig';
+import { isString } from 'util';
+import { getLanguageExtension } from './langconfig';
 import { getLanguageFiles } from './langconfig';
 
 
@@ -89,6 +89,7 @@ export class Playground {
         let filepath = this.m_FileSystemProvider!.filename(document.uri);
         let execScript = this.getExecScript(language, filepath);
         this.m_Process = child_process.spawn(execScript, { "shell": true, "cwd": this.m_FileSystemProvider!.dirname(document.uri) });
+        let start = new Date().getTime();
         this.m_Process.stdout.on('data', (data) => {
             this.m_OutputChannel.append(data.toString());
         });
@@ -97,7 +98,10 @@ export class Playground {
         });
         this.m_Process.on('close', (code) => {
             this.m_Process = undefined;
-            this.m_OutputChannel.appendLine(`\nExit with code ${code}.`);
+            let end = new Date().getTime();
+            this.m_OutputChannel.append("\n");
+            this.m_OutputChannel.appendLine(`Exit with code ${code}.`);
+            this.m_OutputChannel.appendLine(`Take ${(end-start)/1000}s.`);
             this.m_Running = false;
         });
     }
@@ -159,8 +163,7 @@ export class Playground {
         if (this.m_ResetFlag.indexOf(uri.path) === -1)
             this.m_ResetFlag.push(uri.path); 
         this.resetFiles(uri);
-        this.reloadContent(uri);
-        return await this.show(uri);
+        return this.reloadContent(uri);
     }
 
     async resetFiles(uri: vscode.Uri){
@@ -177,7 +180,7 @@ export class Playground {
         });  
     }
 
-    async reloadContent(uri: vscode.Uri){
+    async reloadContent(uri: vscode.Uri): Promise<vscode.TextDocument>{
         let editor = await vscode.window.showTextDocument(uri); 
         let document = editor.document;
         editor.edit((textEdit) => {
@@ -187,6 +190,7 @@ export class Playground {
                 );
         });
         await editor.document.save(); 
+        return editor.document;
     }
 
     async show(uri: vscode.Uri): Promise<vscode.TextDocument> { 
@@ -259,7 +263,6 @@ class Directory implements vscode.FileStat {
     ctime: number;
     mtime: number;
     size: number;
-
     name: string;
     entries: Map<string, File | Directory>;
 
@@ -279,9 +282,7 @@ export class PlaygroundFileSystemProvider implements FileSystemProvider {
     private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
     private _bufferedEvents: vscode.FileChangeEvent[] = [];
     private _fireSoonHandle?: NodeJS.Timer;
-
     readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
-
 
     constructor(baseDir: string) {
         this._baseDir = baseDir;

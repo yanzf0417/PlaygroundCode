@@ -38,6 +38,12 @@ Make sure the language you want to run has been installed on your system. Such a
 
 ## Release Notes
 
+### 1.1.6
+
+1.Show time cost of execution.
+
+2.Bug Fixed
+
 ### 1.1.5
 
 1.Put playground file to the separate folder.
